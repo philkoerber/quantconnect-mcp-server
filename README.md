@@ -1193,6 +1193,33 @@ Returns the latest version of the QC MCP Server released.
 
 ---
 
+## Bug Fixes (Fork)
+
+This fork includes the following fixes for API response validation issues:
+
+### 1. DateTime Format Validation
+**Problem:** Multiple endpoints (`list_backtests`, `list_projects`, `read_project`, `read_file`) failed with schema validation errors because the API returns date-time fields in a format that doesn't match the strict ISO 8601 `format: "date-time"` validator.
+
+```
+data.backtests[0].created should match format "date-time"
+```
+
+**Solution:** Added a custom `DateTimeStr` type that relaxes JSON schema validation for datetime fields while preserving proper Python datetime parsing.
+
+**Affected fields:** `created`, `modified`, `launched`, `stopped`, and other datetime fields across project/backtest/file/live response schemas.
+
+### 2. Empty Parameter Set Validation
+**Problem:** The `list_backtests` endpoint failed with validation errors because the API returns `parameterSet` as an empty list `[]` when there are no parameters, but the schema expected a dictionary.
+
+```
+backtests.0.parameterSet.dict[str,union[str,float,int]]
+  Input should be a valid dictionary [type=dict_type, input_value=[], input_type=list]
+```
+
+**Solution:** Updated the `parameterSet` and `parameters` field types to accept `List` in addition to `Dict`.
+
+---
+
 ## Debugging
 
 ### Build
